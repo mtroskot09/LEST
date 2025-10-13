@@ -51,7 +51,14 @@ export const insertEmployeeSchema = createInsertSchema(employees).omit({
   createdAt: true,
 });
 
+export const updateEmployeeSchema = createInsertSchema(employees).omit({
+  id: true,
+  userId: true,
+  createdAt: true,
+}).partial();
+
 export type InsertEmployee = z.infer<typeof insertEmployeeSchema>;
+export type UpdateEmployee = z.infer<typeof updateEmployeeSchema>;
 export type Employee = typeof employees.$inferSelect;
 
 // Time blocks table
@@ -73,5 +80,13 @@ export const insertTimeBlockSchema = createInsertSchema(timeBlocks).omit({
   updatedAt: true,
 });
 
+export const updateTimeBlockSchema = createInsertSchema(timeBlocks).omit({
+  id: true,
+  userId: true,
+  createdAt: true,
+  updatedAt: true,
+}).partial();
+
 export type InsertTimeBlock = z.infer<typeof insertTimeBlockSchema>;
+export type UpdateTimeBlock = z.infer<typeof updateTimeBlockSchema>;
 export type TimeBlock = typeof timeBlocks.$inferSelect;

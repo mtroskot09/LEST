@@ -6,8 +6,10 @@ import {
   type UpsertUser,
   type Employee,
   type InsertEmployee,
+  type UpdateEmployee,
   type TimeBlock,
   type InsertTimeBlock,
+  type UpdateTimeBlock,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and } from "drizzle-orm";
@@ -21,14 +23,14 @@ export interface IStorage {
   getEmployeesByUser(userId: string): Promise<Employee[]>;
   getEmployee(id: string): Promise<Employee | undefined>;
   createEmployee(employee: InsertEmployee): Promise<Employee>;
-  updateEmployee(id: string, employee: Partial<InsertEmployee>): Promise<Employee | undefined>;
+  updateEmployee(id: string, employee: UpdateEmployee): Promise<Employee | undefined>;
   deleteEmployee(id: string): Promise<void>;
   
   // Time block operations
   getTimeBlocksByUserAndDate(userId: string, date: string): Promise<TimeBlock[]>;
   getTimeBlock(id: string): Promise<TimeBlock | undefined>;
   createTimeBlock(block: InsertTimeBlock): Promise<TimeBlock>;
-  updateTimeBlock(id: string, block: Partial<InsertTimeBlock>): Promise<TimeBlock | undefined>;
+  updateTimeBlock(id: string, block: UpdateTimeBlock): Promise<TimeBlock | undefined>;
   deleteTimeBlock(id: string): Promise<void>;
 }
 
@@ -73,7 +75,7 @@ export class DatabaseStorage implements IStorage {
     return newEmployee;
   }
 
-  async updateEmployee(id: string, employee: Partial<InsertEmployee>): Promise<Employee | undefined> {
+  async updateEmployee(id: string, employee: UpdateEmployee): Promise<Employee | undefined> {
     const [updated] = await db
       .update(employees)
       .set(employee)
@@ -104,7 +106,7 @@ export class DatabaseStorage implements IStorage {
     return newBlock;
   }
 
-  async updateTimeBlock(id: string, block: Partial<InsertTimeBlock>): Promise<TimeBlock | undefined> {
+  async updateTimeBlock(id: string, block: UpdateTimeBlock): Promise<TimeBlock | undefined> {
     const [updated] = await db
       .update(timeBlocks)
       .set({ ...block, updatedAt: new Date() })

@@ -2,7 +2,12 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertEmployeeSchema, insertTimeBlockSchema } from "@shared/schema";
+import { 
+  insertEmployeeSchema, 
+  updateEmployeeSchema,
+  insertTimeBlockSchema,
+  updateTimeBlockSchema,
+} from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -57,12 +62,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const userId = req.user.claims.sub;
       
+      // Verify ownership
       const existing = await storage.getEmployee(id);
       if (!existing || existing.userId !== userId) {
         return res.status(404).json({ message: "Employee not found" });
       }
 
-      const employee = await storage.updateEmployee(id, req.body);
+      // Validate update payload (excludes userId to prevent reassignment)
+      const validation = updateEmployeeSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: fromZodError(validation.error).message 
+        });
+      }
+
+      const employee = await storage.updateEmployee(id, validation.data);
       res.json(employee);
     } catch (error) {
       console.error("Error updating employee:", error);
@@ -130,12 +144,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const userId = req.user.claims.sub;
       
+      // Verify ownership
       const existing = await storage.getTimeBlock(id);
       if (!existing || existing.userId !== userId) {
         return res.status(404).json({ message: "Time block not found" });
       }
 
-      const block = await storage.updateTimeBlock(id, req.body);
+      // If employeeId is being changed, verify the target employee belongs to user
+      if (req.body.employeeId && req.body.employeeId !== existing.employeeId) {
+        const targetEmployee = await storage.getEmployee(req.body.employeeId);
+        if (!targetEmployee || targetEmployee.userId !== userId) {
+          return res.status(403).json({ message: "Cannot transfer to employee from another user" });
+        }
+      }
+
+      // Validate update payload (excludes userId to prevent reassignment)
+      const validation = updateTimeBlockSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: fromZodError(validation.error).message 
+        });
+      }
+
+      const block = await storage.updateTimeBlock(id, validation.data);
       res.json(block);
     } catch (error) {
       console.error("Error updating time block:", error);
