@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth, isAuthenticated } from "./auth";
 import { 
   insertEmployeeSchema, 
   updateEmployeeSchema,
@@ -11,25 +11,13 @@ import {
 import { fromZodError } from "zod-validation-error";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
-  await setupAuth(app);
-
-  // Auth routes
-  app.get("/api/auth/user", isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
+  // Setup authentication
+  setupAuth(app);
 
   // Employee routes
   app.get("/api/employees", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const employees = await storage.getEmployeesByUser(userId);
       res.json(employees);
     } catch (error) {
@@ -40,7 +28,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/employees", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const validation = insertEmployeeSchema.safeParse({ ...req.body, userId });
       
       if (!validation.success) {
@@ -60,7 +48,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/employees/:id", isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       
       // Verify ownership
       const existing = await storage.getEmployee(id);
@@ -87,7 +75,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/employees/:id", isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       
       const existing = await storage.getEmployee(id);
       if (!existing || existing.userId !== userId) {
@@ -105,7 +93,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Time block routes
   app.get("/api/timeblocks", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const { date } = req.query;
       
       if (!date) {
@@ -122,7 +110,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/timeblocks", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const validation = insertTimeBlockSchema.safeParse({ ...req.body, userId });
       
       if (!validation.success) {
@@ -142,7 +130,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/timeblocks/:id", isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       
       // Verify ownership
       const existing = await storage.getTimeBlock(id);
@@ -177,7 +165,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/timeblocks/:id", isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       
       const existing = await storage.getTimeBlock(id);
       if (!existing || existing.userId !== userId) {

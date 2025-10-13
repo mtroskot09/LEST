@@ -1,17 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/hooks/useLanguage";
 import { useToast } from "@/hooks/use-toast";
-import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { format } from "date-fns";
 import ScheduleGrid from "@/components/ScheduleGrid";
 import EmployeeManager from "@/components/EmployeeManager";
 import DateNavigator from "@/components/DateNavigator";
 import ThemeToggle from "@/components/ThemeToggle";
+import LanguageSwitch from "@/components/LanguageSwitch";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, Users, LogOut } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Scissors, Users, LogOut } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Sheet,
   SheetContent,
@@ -48,60 +49,35 @@ function transformTimeBlock(dbBlock: DBTimeBlock) {
 }
 
 export default function Schedule() {
-  const { user, isLoading: authLoading, isAuthenticated } = useAuth();
+  const { user, logoutMutation } = useAuth();
+  const { t } = useLanguage();
   const { toast } = useToast();
   const [currentDate, setCurrentDate] = useState(new Date());
   const dateStr = format(currentDate, "yyyy-MM-dd");
 
-  // Redirect if not authenticated
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-    }
-  }, [isAuthenticated, authLoading, toast]);
-
   // Fetch employees
   const { data: dbEmployees = [] } = useQuery<DBEmployee[]>({
     queryKey: ["/api/employees"],
-    enabled: isAuthenticated,
   });
 
   // Fetch time blocks
   const { data: dbTimeBlocks = [] } = useQuery<DBTimeBlock[]>({
     queryKey: ["/api/timeblocks", dateStr],
-    enabled: isAuthenticated,
   });
 
   // Employee mutations
   const createEmployeeMutation = useMutation({
     mutationFn: async (data: { name: string; color: string; displayOrder: number }) => {
-      return await apiRequest("/api/employees", "POST", data);
+      const res = await apiRequest("POST", "/api/employees", data);
+      return await res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/employees"] });
     },
-    onError: (error: Error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
+    onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to create employee",
+        title: t.messages.error,
+        description: t.messages.failedToCreateEmployee,
         variant: "destructive",
       });
     },
@@ -109,27 +85,17 @@ export default function Schedule() {
 
   const deleteEmployeeMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await apiRequest(`/api/employees/${id}`, "DELETE");
+      const res = await apiRequest("DELETE", `/api/employees/${id}`);
+      return await res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/employees"] });
       queryClient.invalidateQueries({ queryKey: ["/api/timeblocks"] });
     },
-    onError: (error: Error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
+    onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to delete employee",
+        title: t.messages.error,
+        description: t.messages.failedToDeleteEmployee,
         variant: "destructive",
       });
     },
@@ -144,26 +110,16 @@ export default function Schedule() {
       endTime: string;
       task?: string;
     }) => {
-      return await apiRequest("/api/timeblocks", "POST", data);
+      const res = await apiRequest("POST", "/api/timeblocks", data);
+      return await res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/timeblocks", dateStr] });
     },
-    onError: (error: Error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
+    onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to create time block",
+        title: t.messages.error,
+        description: t.messages.failedToCreateBlock,
         variant: "destructive",
       });
     },
@@ -171,26 +127,16 @@ export default function Schedule() {
 
   const updateBlockMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<DBTimeBlock> }) => {
-      return await apiRequest(`/api/timeblocks/${id}`, "PATCH", data);
+      const res = await apiRequest("PATCH", `/api/timeblocks/${id}`, data);
+      return await res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/timeblocks", dateStr] });
     },
-    onError: (error: Error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
+    onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to update time block",
+        title: t.messages.error,
+        description: t.messages.failedToUpdateBlock,
         variant: "destructive",
       });
     },
@@ -198,26 +144,16 @@ export default function Schedule() {
 
   const deleteBlockMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await apiRequest(`/api/timeblocks/${id}`, "DELETE");
+      const res = await apiRequest("DELETE", `/api/timeblocks/${id}`);
+      return await res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/timeblocks", dateStr] });
     },
-    onError: (error: Error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
+    onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to delete time block",
+        title: t.messages.error,
+        description: t.messages.failedToDeleteBlock,
         variant: "destructive",
       });
     },
@@ -298,25 +234,18 @@ export default function Schedule() {
     });
   };
 
-  const handleLogout = () => {
-    window.location.href = "/api/logout";
-  };
-
-  const userInitials = user
-    ? `${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase() || user.email?.[0]?.toUpperCase() || "U"
-    : "U";
-
-  if (authLoading || !isAuthenticated) {
-    return null;
-  }
+  const userInitials = user?.username?.substring(0, 2).toUpperCase() || "U";
 
   return (
     <div className="h-screen flex flex-col">
       <header className="border-b bg-card px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <CalendarDays className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-semibold">Schedule Manager</h1>
+            <Scissors className="h-6 w-6 text-primary" />
+            <div>
+              <h1 className="text-lg font-semibold">{t.appName}</h1>
+              <p className="text-xs text-muted-foreground">{t.salon}</p>
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
@@ -326,12 +255,12 @@ export default function Schedule() {
               <SheetTrigger asChild>
                 <Button variant="outline" size="sm" data-testid="button-manage-employees">
                   <Users className="h-4 w-4 mr-1" />
-                  Employees
+                  {t.nav.employees}
                 </Button>
               </SheetTrigger>
               <SheetContent>
                 <SheetHeader>
-                  <SheetTitle>Manage Employees</SheetTitle>
+                  <SheetTitle>{t.employees.title}</SheetTitle>
                 </SheetHeader>
                 <div className="mt-6">
                   <EmployeeManager employees={employees} onEmployeesChange={handleEmployeesChange} />
@@ -339,21 +268,21 @@ export default function Schedule() {
               </SheetContent>
             </Sheet>
 
+            <LanguageSwitch />
             <ThemeToggle />
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" data-testid="button-user-menu">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={user?.profileImageUrl || undefined} />
                     <AvatarFallback>{userInitials}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleLogout} data-testid="button-logout">
+                <DropdownMenuItem onClick={() => logoutMutation.mutate()} data-testid="button-logout">
                   <LogOut className="h-4 w-4 mr-2" />
-                  Sign Out
+                  {t.nav.signOut}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

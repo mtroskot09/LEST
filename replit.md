@@ -1,10 +1,10 @@
-# Schedule Manager - Employee Time Scheduling Application
+# Schedule Manager - Frizerski studio LEST
 
 ## Overview
-A collaborative employee scheduling application with drag-and-drop time block management, built with React, Express, and PostgreSQL. Users can manage employee schedules, create time blocks with 15-minute precision, and transfer shifts between employees seamlessly.
+Employee scheduling application for "Frizerski studio LEST", a hair salon in Zagreb, Croatia. Features drag-and-drop time block management, username/password authentication, and bilingual support (Croatian/English).
 
 ## Current State
-**Status:** ✅ Fully functional MVP with authentication, database persistence, and real-time collaboration
+**Status:** ✅ Fully functional with username/password auth, Croatian/English translations, and database persistence
 
 **Last Updated:** October 13, 2025
 
@@ -12,36 +12,44 @@ A collaborative employee scheduling application with drag-and-drop time block ma
 - **Frontend:** React, TypeScript, Tailwind CSS, Shadcn UI
 - **Backend:** Express.js, Node.js
 - **Database:** PostgreSQL (Neon)
-- **Authentication:** Replit Auth (OpenID Connect)
+- **Authentication:** Username/Password (Session-based with Passport.js)
 - **State Management:** React Query (TanStack Query)
 - **Date Handling:** date-fns
+- **Internationalization:** Custom translation system
 
 ## Core Features
 
 ### 1. User Authentication
-- **Login/Logout:** Powered by Replit Auth
-- **Multi-provider Support:** Google, GitHub, X, Apple, email/password
+- **Login/Register:** Username and password authentication
 - **Session Management:** Secure cookie-based sessions with PostgreSQL storage
 - **Protected Routes:** All scheduling features require authentication
+- **Security:** Password hashing with scrypt, sanitized user data (no password exposure)
+- **Multi-language Support:** Croatian (default) and English
 
-### 2. Employee Management
+### 2. Language Support
+- **Default Language:** Croatian (hr)
+- **Supported Languages:** Croatian, English
+- **Toggle:** Language switcher in header
+- **Persistence:** Language preference stored in localStorage
+
+### 3. Employee Management  
 - **CRUD Operations:** Create, read, update, delete employees
 - **Color Coding:** Each employee gets a unique color for visual distinction
 - **Display Order:** Employees maintain consistent ordering
 - **User Isolation:** Each user manages their own team
 
-### 3. Time Block Scheduling
+### 4. Time Block Scheduling
 - **Drag-and-Drop Interface:** Click cells to create blocks, drag to move
 - **15-Minute Precision:** Time slots from 9:00 AM to 7:00 PM in 30-minute increments
 - **Task Assignment:** Optional task description for each time block
 - **Visual Calendar Grid:** Clean, intuitive schedule view
 
-### 4. Shift Transfer
+### 5. Shift Transfer
 - **Cross-Employee Transfer:** Drag time blocks between employee columns
 - **Real-time Updates:** Automatic persistence to database
 - **Conflict Prevention:** Visual feedback during drag operations
 
-### 5. Date Navigation
+### 6. Date Navigation
 - **Day Navigation:** Move forward/backward by day
 - **Today Button:** Quick return to current date
 - **Date Display:** Clear indication of selected date
@@ -50,20 +58,18 @@ A collaborative employee scheduling application with drag-and-drop time block ma
 
 ### Database Schema
 ```typescript
-// Users (Replit Auth)
+// Users (Username/Password Auth)
 users {
-  id: varchar (primary key)
-  email: varchar (unique)
-  firstName: varchar
-  lastName: varchar
-  profileImageUrl: varchar
+  id: varchar (primary key, UUID)
+  username: varchar (unique)
+  password: varchar (hashed with scrypt)
   createdAt: timestamp
   updatedAt: timestamp
 }
 
 // Employees
 employees {
-  id: varchar (primary key)
+  id: varchar (primary key, UUID)
   userId: varchar (foreign key)
   name: varchar
   color: varchar
@@ -73,18 +79,18 @@ employees {
 
 // Time Blocks
 timeBlocks {
-  id: varchar (primary key)
+  id: varchar (primary key, UUID)
   userId: varchar (foreign key)
   employeeId: varchar (foreign key)
-  date: varchar
-  startTime: varchar
-  endTime: varchar
+  date: varchar (YYYY-MM-DD)
+  startTime: varchar (HH:MM)
+  endTime: varchar (HH:MM)
   task: text (optional)
   createdAt: timestamp
   updatedAt: timestamp
 }
 
-// Sessions (Replit Auth)
+// Sessions (Express Session)
 sessions {
   sid: varchar (primary key)
   sess: jsonb
@@ -95,10 +101,10 @@ sessions {
 ### API Routes
 
 #### Authentication
-- `GET /api/login` - Initiate login flow
-- `GET /api/callback` - OAuth callback handler
-- `GET /api/logout` - Logout and clear session
-- `GET /api/auth/user` - Get current user (protected)
+- `POST /api/register` - Register new user with { username, password }
+- `POST /api/login` - Login with { username, password }
+- `POST /api/logout` - Logout and clear session
+- `GET /api/user` - Get current user (protected, sanitized without password)
 
 #### Employees
 - `GET /api/employees` - List user's employees (protected)
@@ -118,21 +124,24 @@ client/src/
 ├── components/
 │   ├── ui/              # Shadcn UI components
 │   ├── ThemeToggle.tsx  # Dark/light mode switcher
+│   ├── LanguageSwitch.tsx # Croatian/English toggle
 │   ├── EmployeeAvatar.tsx
 │   ├── TimeBlock.tsx    # Individual time block component
 │   ├── ScheduleGrid.tsx # Main calendar grid
 │   ├── EmployeeManager.tsx
 │   └── DateNavigator.tsx
 ├── pages/
-│   ├── Landing.tsx      # Public landing page
+│   ├── Auth.tsx         # Login/Register page
 │   ├── Schedule.tsx     # Main scheduling interface
 │   └── not-found.tsx
 ├── hooks/
-│   └── useAuth.ts       # Authentication hook
+│   ├── useAuth.tsx      # Authentication hook & context
+│   └── useLanguage.tsx  # Translation hook & context
 ├── lib/
 │   ├── queryClient.ts   # React Query setup
-│   └── authUtils.ts     # Auth error handling
-└── App.tsx              # Router and auth logic
+│   ├── protected-route.tsx # Route protection wrapper
+│   └── translations.ts  # Croatian/English translations
+└── App.tsx              # Router and providers
 ```
 
 ### Backend Structure
@@ -141,42 +150,54 @@ server/
 ├── index.ts           # Express server entry
 ├── routes.ts          # API route handlers
 ├── storage.ts         # Database operations
-├── replitAuth.ts      # Authentication setup
+├── auth.ts            # Authentication setup (passport-local)
 ├── db.ts              # Database connection
 └── vite.ts            # Vite dev server
+```
+
+### Shared Schema
+```
+shared/
+└── schema.ts          # Drizzle ORM schema & Zod validators
 ```
 
 ## User Preferences & Workflow
 
 ### Design Preferences
-- **Color Scheme:** Blue primary (#3B82F6), clean professional aesthetic
+- **Branding:** Frizerski studio LEST, Zagreb, Croatia
+- **Primary Color:** Blue (#3B82F6)
+- **Languages:** Croatian (default), English
+- **Typography:** Inter font family
 - **Dark Mode:** Fully supported with automatic theme detection
-- **Typography:** Inter font family for clarity
-- **Spacing:** Consistent 4/8/16/24px spacing scale
+- **Icons:** Lucide React icons, Scissors icon for branding
 
 ### Development Workflow
 1. Database changes: Update `shared/schema.ts`, then run `npm run db:push`
 2. Frontend components: Built with Shadcn UI and Tailwind
 3. API routes: Keep thin, delegate to storage layer
 4. State management: React Query for server state, local state for UI
+5. Translations: Add keys to `client/src/lib/translations.ts`
 
 ## Recent Changes
 
 ### October 13, 2025
-- ✅ Implemented Replit Auth for user authentication
-- ✅ Created database schema with users, employees, and time blocks
-- ✅ Built backend API routes with full CRUD operations
-- ✅ Connected frontend to backend with React Query
-- ✅ Implemented drag-and-drop shift transfer
-- ✅ Added landing page for unauthenticated users
-- ✅ Set up user-isolated data (each user sees only their data)
+- ✅ Switched from Replit Auth to username/password authentication
+- ✅ Implemented comprehensive translation system (Croatian/English)
+- ✅ Updated database schema for username/password auth
+- ✅ Created Auth page with login/register forms
+- ✅ Added LanguageSwitch component with localStorage persistence
+- ✅ Updated all UI components to use translations
+- ✅ Fixed security vulnerabilities in PATCH endpoints (user ownership validation)
+- ✅ Branded for Frizerski studio LEST hair salon
+- ✅ Fixed apiRequest parameter order issues
+- ✅ Updated routing: landing page (/) is login/auth, schedule at /schedule
+- ✅ Fixed session cookie settings for development (secure only in production)
+- ✅ Implemented user sanitization to prevent password hash exposure
 
 ## Environment Variables
 - `DATABASE_URL` - PostgreSQL connection string
 - `SESSION_SECRET` - Session encryption key
-- `REPL_ID` - Replit application ID
-- `REPLIT_DOMAINS` - Comma-separated allowed domains
-- `ISSUER_URL` - OAuth issuer URL (defaults to Replit OIDC)
+- `NODE_ENV` - Environment (development/production)
 
 ## Running the Application
 ```bash
@@ -186,12 +207,33 @@ npm run db:push  # Sync database schema
 
 ## Key Design Decisions
 
-1. **User Isolation:** Each user has their own employees and schedules
-2. **Date-Based Queries:** Time blocks fetched by date for performance
-3. **Color Assignment:** Automatic color rotation for new employees
-4. **Drag Transfer:** Moving blocks between columns = shift transfer
-5. **Real-time Sync:** Optimistic updates with React Query
-6. **Auth Flow:** Landing page for logged-out, schedule for logged-in
+1. **Authentication:** Username/password (not OAuth) per user request
+2. **Language:** Croatian as default, English as secondary
+3. **User Isolation:** Each user has their own employees and schedules
+4. **Date-Based Queries:** Time blocks fetched by date for performance
+5. **Color Assignment:** Automatic color rotation for new employees
+6. **Drag Transfer:** Moving blocks between columns = shift transfer
+7. **Real-time Sync:** Optimistic updates with React Query
+8. **Protected Routes:** Landing page (/) is login/auth, schedule at /schedule route
+9. **Security:** All user data sanitized before sending to client, passwords hashed with scrypt
+
+## Translation Keys
+All UI text is translated. Key translation categories:
+- `appName`, `salon` - Branding
+- `auth.*` - Login/register forms
+- `nav.*` - Navigation and header
+- `employees.*` - Employee management
+- `timeBlock.*` - Time block creation
+- `date.*` - Date navigation
+- `messages.*` - Error/success messages
+
+## Security Features
+1. **Password Hashing:** Scrypt with random salt (cryptographically secure)
+2. **Session Security:** Secure cookies in production, PostgreSQL persistence
+3. **Data Sanitization:** Password hashes never sent to client or stored in sessions
+4. **User Ownership:** PATCH/DELETE endpoints validate user owns the resource
+5. **Input Validation:** Zod schemas for all API inputs
+6. **Protected Routes:** Authentication middleware on all sensitive endpoints
 
 ## Future Enhancements
 - Week/month calendar views
@@ -201,3 +243,4 @@ npm run db:push  # Sync database schema
 - Export to PDF/calendar formats
 - Conflict detection and warnings
 - Mobile-responsive drag-and-drop
+- Additional language support (German, Italian, etc.)

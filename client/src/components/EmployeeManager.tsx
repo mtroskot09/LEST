@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLanguage } from "@/hooks/useLanguage";
 import { Employee } from "./ScheduleGrid";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -22,6 +23,7 @@ const EMPLOYEE_COLORS = [
 ];
 
 export default function EmployeeManager({ employees, onEmployeesChange }: EmployeeManagerProps) {
+  const { t } = useLanguage();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newEmployeeName, setNewEmployeeName] = useState("");
 
@@ -48,10 +50,10 @@ export default function EmployeeManager({ employees, onEmployeesChange }: Employ
     <>
       <div className="space-y-2">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Employees</h2>
+          <h2 className="text-lg font-semibold">{t.employees.title}</h2>
           <Button size="sm" onClick={() => setIsDialogOpen(true)} data-testid="button-add-employee">
             <Plus className="h-4 w-4 mr-1" />
-            Add
+            {t.employees.add}
           </Button>
         </div>
 
@@ -81,14 +83,14 @@ export default function EmployeeManager({ employees, onEmployeesChange }: Employ
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent data-testid="dialog-add-employee">
           <DialogHeader>
-            <DialogTitle>Add New Employee</DialogTitle>
+            <DialogTitle>{t.employees.addNew}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="employee-name">Employee Name</Label>
+              <Label htmlFor="employee-name">{t.employees.name}</Label>
               <Input
                 id="employee-name"
-                placeholder="e.g., John Doe"
+                placeholder={t.employees.namePlaceholder}
                 value={newEmployeeName}
                 onChange={(e) => setNewEmployeeName(e.target.value)}
                 data-testid="input-employee-name"
@@ -97,10 +99,10 @@ export default function EmployeeManager({ employees, onEmployeesChange }: Employ
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsDialogOpen(false)} data-testid="button-cancel-employee">
-              Cancel
+              {t.employees.cancel}
             </Button>
             <Button onClick={handleAddEmployee} data-testid="button-confirm-employee">
-              Add Employee
+              {t.employees.confirm}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -1,4 +1,5 @@
 import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
+import { useLanguage } from "@/hooks/useLanguage";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 
@@ -8,6 +9,8 @@ interface DateNavigatorProps {
 }
 
 export default function DateNavigator({ date, onDateChange }: DateNavigatorProps) {
+  const { t } = useLanguage();
+
   const handlePrevDay = () => {
     const newDate = new Date(date);
     newDate.setDate(newDate.getDate() - 1);
@@ -33,7 +36,7 @@ export default function DateNavigator({ date, onDateChange }: DateNavigatorProps
         data-testid="button-today"
       >
         <Calendar className="h-4 w-4 mr-1" />
-        Today
+        {t.date.today}
       </Button>
       <div className="flex items-center gap-1">
         <Button

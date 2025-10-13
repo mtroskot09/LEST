@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLanguage } from "@/hooks/useLanguage";
 import TimeBlock, { TimeBlockData } from "./TimeBlock";
 import EmployeeAvatar from "./EmployeeAvatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -21,6 +22,7 @@ interface ScheduleGridProps {
 }
 
 export default function ScheduleGrid({ employees, blocks, onBlocksChange, date }: ScheduleGridProps) {
+  const { t } = useLanguage();
   const [draggedBlock, setDraggedBlock] = useState<TimeBlockData | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<string>("");
@@ -95,7 +97,7 @@ export default function ScheduleGrid({ employees, blocks, onBlocksChange, date }
           <div className="flex">
             <div className="w-20 flex-shrink-0 sticky left-0 bg-background z-10">
               <div className="h-12 border-b flex items-center px-2">
-                <span className="text-xs font-medium text-muted-foreground">Time</span>
+                <span className="text-xs font-medium text-muted-foreground">{t.time}</span>
               </div>
             </div>
 
@@ -153,11 +155,11 @@ export default function ScheduleGrid({ employees, blocks, onBlocksChange, date }
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent data-testid="dialog-create-block">
           <DialogHeader>
-            <DialogTitle>Add Time Block</DialogTitle>
+            <DialogTitle>{t.timeBlock.add}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="start-time">Start Time</Label>
+              <Label htmlFor="start-time">{t.timeBlock.startTime}</Label>
               <Input
                 id="start-time"
                 type="time"
@@ -167,7 +169,7 @@ export default function ScheduleGrid({ employees, blocks, onBlocksChange, date }
               />
             </div>
             <div>
-              <Label htmlFor="end-time">End Time</Label>
+              <Label htmlFor="end-time">{t.timeBlock.endTime}</Label>
               <Input
                 id="end-time"
                 type="time"
@@ -177,10 +179,10 @@ export default function ScheduleGrid({ employees, blocks, onBlocksChange, date }
               />
             </div>
             <div>
-              <Label htmlFor="task">Task (Optional)</Label>
+              <Label htmlFor="task">{t.timeBlock.task}</Label>
               <Input
                 id="task"
-                placeholder="e.g., Customer appointment"
+                placeholder={t.timeBlock.taskPlaceholder}
                 value={newBlockData.task}
                 onChange={(e) => setNewBlockData({ ...newBlockData, task: e.target.value })}
                 data-testid="input-task"
@@ -189,10 +191,10 @@ export default function ScheduleGrid({ employees, blocks, onBlocksChange, date }
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsDialogOpen(false)} data-testid="button-cancel">
-              Cancel
+              {t.timeBlock.cancel}
             </Button>
             <Button onClick={handleCreateBlock} data-testid="button-create">
-              Create Block
+              {t.timeBlock.create}
             </Button>
           </DialogFooter>
         </DialogContent>

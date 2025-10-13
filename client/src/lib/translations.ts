@@ -4,10 +4,26 @@ export const translations = {
     appName: "Frizerski studio LEST",
     salon: "Frizerski salon u Zagrebu",
     
+    // Auth page
+    auth: {
+      welcomeBack: "Dobrodošli natrag",
+      createAccount: "Kreirajte račun",
+      loginSubtitle: "Prijavite se kako biste pristupili svom rasporedu",
+      registerSubtitle: "Registrirajte se kako biste počeli upravljati terminima",
+      username: "Korisničko ime",
+      password: "Lozinka",
+      login: "Prijavite se",
+      register: "Registrirajte se",
+      haveAccount: "Već imate račun?",
+      noAccount: "Nemate račun?",
+      switchToLogin: "Prijavite se",
+      switchToRegister: "Registrirajte se",
+    },
+    
     // Landing page
     landing: {
-      title: "Upravljajte rasporedom svog tima",
-      description: "Sustav za planiranje termina s povuci-i-ispusti funkcionalnosti za blokove vremena. Surađujte s timom i premještajte termine jednostavno.",
+      title: "Upravljajte rasporedom vašeg salona",
+      description: "Sustav za planiranje termina s povuci-i-ispusti funkcionalnosti. Organizirajte termine vaših frizera jednostavno i efikasno.",
       getStarted: "Počnite",
       signIn: "Prijavite se",
       features: {
@@ -17,7 +33,7 @@ export const translations = {
         },
         collaboration: {
           title: "Timska suradnja",
-          description: "Upravljajte s više zaposlenika i premještajte termine između članova tima bez napora.",
+          description: "Upravljajte s više frizera i premještajte termine između članova tima bez napora.",
         },
         calendar: {
           title: "Kalendarski prikaz",
@@ -28,7 +44,7 @@ export const translations = {
     
     // Navigation & Header
     nav: {
-      employees: "Zaposlenici",
+      employees: "Frizeri",
       today: "Danas",
       signOut: "Odjavite se",
     },
@@ -42,24 +58,24 @@ export const translations = {
     
     // Employees
     employees: {
-      title: "Zaposlenici",
+      title: "Frizeri",
       add: "Dodaj",
-      addNew: "Dodaj novog zaposlenika",
-      name: "Ime zaposlenika",
+      addNew: "Dodaj novog frizera",
+      name: "Ime frizera",
       namePlaceholder: "npr. Ana Horvat",
       cancel: "Odustani",
-      confirm: "Dodaj zaposlenika",
+      confirm: "Dodaj frizera",
       deleteConfirm: "Jeste li sigurni?",
     },
     
     // Time blocks
     timeBlock: {
-      add: "Dodaj vremenski blok",
+      add: "Dodaj termin",
       startTime: "Početno vrijeme",
       endTime: "Završno vrijeme",
-      task: "Zadatak (neobavezno)",
-      taskPlaceholder: "npr. Šišanje i bojanje",
-      create: "Kreiraj blok",
+      task: "Usluga (neobavezno)",
+      taskPlaceholder: "npr. Šišanje i feniranje",
+      create: "Kreiraj termin",
       cancel: "Odustani",
     },
     
@@ -67,12 +83,15 @@ export const translations = {
     messages: {
       unauthorized: "Neovlašteno",
       loggingIn: "Prijavljujete se...",
+      loginFailed: "Prijava neuspješna",
+      registerFailed: "Registracija neuspješna",
+      logoutFailed: "Odjava neuspješna",
       error: "Greška",
-      failedToCreateEmployee: "Nije moguće kreirati zaposlenika",
-      failedToDeleteEmployee: "Nije moguće obrisati zaposlenika",
-      failedToCreateBlock: "Nije moguće kreirati vremenski blok",
-      failedToUpdateBlock: "Nije moguće ažurirati vremenski blok",
-      failedToDeleteBlock: "Nije moguće obrisati vremenski blok",
+      failedToCreateEmployee: "Nije moguće kreirati frizera",
+      failedToDeleteEmployee: "Nije moguće obrisati frizera",
+      failedToCreateBlock: "Nije moguće kreirati termin",
+      failedToUpdateBlock: "Nije moguće ažurirati termin",
+      failedToDeleteBlock: "Nije moguće obrisati termin",
     },
     
     // Time labels
@@ -84,10 +103,26 @@ export const translations = {
     appName: "Frizerski studio LEST",
     salon: "Hair Salon in Zagreb",
     
+    // Auth page
+    auth: {
+      welcomeBack: "Welcome back",
+      createAccount: "Create an account",
+      loginSubtitle: "Sign in to access your schedule",
+      registerSubtitle: "Register to start managing appointments",
+      username: "Username",
+      password: "Password",
+      login: "Sign In",
+      register: "Register",
+      haveAccount: "Already have an account?",
+      noAccount: "Don't have an account?",
+      switchToLogin: "Sign in",
+      switchToRegister: "Register",
+    },
+    
     // Landing page
     landing: {
-      title: "Manage Your Team's Schedule",
-      description: "Drag-and-drop scheduling for employee time blocks. Collaborate with your team and transfer shifts seamlessly.",
+      title: "Manage Your Salon's Schedule",
+      description: "Drag-and-drop appointment scheduling. Organize your hairdressers' schedules easily and efficiently.",
       getStarted: "Get Started",
       signIn: "Sign In",
       features: {
@@ -97,7 +132,7 @@ export const translations = {
         },
         collaboration: {
           title: "Team Collaboration",
-          description: "Manage multiple employees and transfer shifts between team members effortlessly.",
+          description: "Manage multiple hairdressers and transfer appointments between team members effortlessly.",
         },
         calendar: {
           title: "Calendar View",
@@ -108,7 +143,7 @@ export const translations = {
     
     // Navigation & Header
     nav: {
-      employees: "Employees",
+      employees: "Hairdressers",
       today: "Today",
       signOut: "Sign Out",
     },
@@ -122,24 +157,24 @@ export const translations = {
     
     // Employees
     employees: {
-      title: "Employees",
+      title: "Hairdressers",
       add: "Add",
-      addNew: "Add New Employee",
-      name: "Employee Name",
+      addNew: "Add New Hairdresser",
+      name: "Hairdresser Name",
       namePlaceholder: "e.g. John Doe",
       cancel: "Cancel",
-      confirm: "Add Employee",
+      confirm: "Add Hairdresser",
       deleteConfirm: "Are you sure?",
     },
     
     // Time blocks
     timeBlock: {
-      add: "Add Time Block",
+      add: "Add Appointment",
       startTime: "Start Time",
       endTime: "End Time",
-      task: "Task (Optional)",
+      task: "Service (Optional)",
       taskPlaceholder: "e.g. Haircut and styling",
-      create: "Create Block",
+      create: "Create Appointment",
       cancel: "Cancel",
     },
     
@@ -147,12 +182,15 @@ export const translations = {
     messages: {
       unauthorized: "Unauthorized",
       loggingIn: "Logging in again...",
+      loginFailed: "Login failed",
+      registerFailed: "Registration failed",
+      logoutFailed: "Logout failed",
       error: "Error",
-      failedToCreateEmployee: "Failed to create employee",
-      failedToDeleteEmployee: "Failed to delete employee",
-      failedToCreateBlock: "Failed to create time block",
-      failedToUpdateBlock: "Failed to update time block",
-      failedToDeleteBlock: "Failed to delete time block",
+      failedToCreateEmployee: "Failed to create hairdresser",
+      failedToDeleteEmployee: "Failed to delete hairdresser",
+      failedToCreateBlock: "Failed to create appointment",
+      failedToUpdateBlock: "Failed to update appointment",
+      failedToDeleteBlock: "Failed to delete appointment",
     },
     
     // Time labels
