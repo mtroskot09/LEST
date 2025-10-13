@@ -11,9 +11,8 @@ import LanguageSwitch from "@/components/LanguageSwitch";
 import ThemeToggle from "@/components/ThemeToggle";
 
 export default function Auth() {
-  const { user, loginMutation, registerMutation } = useAuth();
+  const { user, loginMutation } = useAuth();
   const { t } = useLanguage();
-  const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
@@ -23,14 +22,10 @@ export default function Auth() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (isLogin) {
-      loginMutation.mutate({ username, password });
-    } else {
-      registerMutation.mutate({ username, password });
-    }
+    loginMutation.mutate({ username, password });
   };
 
-  const isPending = loginMutation.isPending || registerMutation.isPending;
+  const isPending = loginMutation.isPending;
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
@@ -54,10 +49,10 @@ export default function Auth() {
             <div className="space-y-6">
               <div className="space-y-2 text-center">
                 <h2 className="text-2xl font-semibold">
-                  {isLogin ? t.auth.welcomeBack : t.auth.createAccount}
+                  {t.auth.welcomeBack}
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  {isLogin ? t.auth.loginSubtitle : t.auth.registerSubtitle}
+                  {t.auth.loginSubtitle}
                 </p>
               </div>
 
@@ -93,23 +88,9 @@ export default function Auth() {
                   disabled={isPending}
                   data-testid="button-submit"
                 >
-                  {isLogin ? t.auth.login : t.auth.register}
+                  {t.auth.login}
                 </Button>
               </form>
-
-              <div className="text-center text-sm">
-                <span className="text-muted-foreground">
-                  {isLogin ? t.auth.noAccount : t.auth.haveAccount}{" "}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setIsLogin(!isLogin)}
-                  className="text-primary hover:underline"
-                  data-testid="button-switch-mode"
-                >
-                  {isLogin ? t.auth.switchToRegister : t.auth.switchToLogin}
-                </button>
-              </div>
             </div>
           </Card>
         </div>

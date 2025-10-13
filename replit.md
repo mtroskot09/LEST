@@ -20,7 +20,8 @@ Employee scheduling application for "Frizerski studio LEST", a hair salon in Zag
 ## Core Features
 
 ### 1. User Authentication
-- **Login/Register:** Username and password authentication
+- **Login Only:** Single admin user authentication (no registration)
+- **Credentials:** Username: `admin@lest.hr` / Password: `fIqM&3G)]LRojQ4v`
 - **Session Management:** Secure cookie-based sessions with PostgreSQL storage
 - **Protected Routes:** All scheduling features require authentication
 - **Security:** Password hashing with scrypt, sanitized user data (no password exposure)
@@ -101,7 +102,6 @@ sessions {
 ### API Routes
 
 #### Authentication
-- `POST /api/register` - Register new user with { username, password }
 - `POST /api/login` - Login with { username, password }
 - `POST /api/logout` - Logout and clear session
 - `GET /api/user` - Get current user (protected, sanitized without password)
@@ -184,7 +184,7 @@ shared/
 - ✅ Switched from Replit Auth to username/password authentication
 - ✅ Implemented comprehensive translation system (Croatian/English)
 - ✅ Updated database schema for username/password auth
-- ✅ Created Auth page with login/register forms
+- ✅ Created Auth page with login form (no registration)
 - ✅ Added LanguageSwitch component with localStorage persistence
 - ✅ Updated all UI components to use translations
 - ✅ Fixed security vulnerabilities in PATCH endpoints (user ownership validation)
@@ -193,6 +193,7 @@ shared/
 - ✅ Updated routing: landing page (/) is login/auth, schedule at /schedule
 - ✅ Fixed session cookie settings for development (secure only in production)
 - ✅ Implemented user sanitization to prevent password hash exposure
+- ✅ Simplified to single admin user (removed registration system)
 
 ## Environment Variables
 - `DATABASE_URL` - PostgreSQL connection string

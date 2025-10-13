@@ -80,29 +80,6 @@ export function setupAuth(app: Express) {
     done(null, user ? sanitizeUser(user) : null);
   });
 
-  app.post("/api/register", async (req, res, next) => {
-    try {
-      const existingUser = await storage.getUserByUsername(req.body.username);
-      if (existingUser) {
-        return res.status(400).json({ message: "Username already exists" });
-      }
-
-      const user = await storage.createUser({
-        username: req.body.username,
-        password: await hashPassword(req.body.password),
-      });
-
-      const sanitized = sanitizeUser(user);
-      req.login(sanitized, (err) => {
-        if (err) return next(err);
-        res.status(201).json(sanitized);
-      });
-    } catch (error) {
-      console.error("Register error:", error);
-      res.status(500).json({ message: "Registration failed" });
-    }
-  });
-
   app.post("/api/login", (req, res, next) => {
     passport.authenticate("local", (err: any, user: any, info: any) => {
       if (err) return next(err);
