@@ -12,7 +12,7 @@ import { fromZodError } from "zod-validation-error";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
-  setupAuth(app);
+  await setupAuth(app);
 
   // Employee routes
   app.get("/api/employees", isAuthenticated, async (req: any, res) => {

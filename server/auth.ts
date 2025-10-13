@@ -1,9 +1,48 @@
 import passport from "passport";
 import { Express } from "express";
 import session from "express-session";
+import { scrypt, randomBytes, timingSafeEqual } from "crypto";
+import { promisify } from "util";
+import { storage } from "./storage";
 import connectPg from "connect-pg-simple";
 
-export function setupAuth(app: Express) {
+const scryptAsync = promisify(scrypt);
+
+async function hashPassword(password: string) {
+  const salt = randomBytes(16).toString("hex");
+  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
+  return `${buf.toString("hex")}.${salt}`;
+}
+
+async function comparePasswords(supplied: string, stored: string) {
+  const [hashed, salt] = stored.split(".");
+  const hashedBuf = Buffer.from(hashed, "hex");
+  const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
+  return timingSafeEqual(hashedBuf, suppliedBuf);
+}
+
+async function ensureAdminUser() {
+  const adminUsername = "admin@lest.hr";
+  const adminPassword = "fIqM&3G)]LRojQ4v";
+  
+  try {
+    const existingUser = await storage.getUserByUsername(adminUsername);
+    if (!existingUser) {
+      console.log("Creating admin user...");
+      const hashedPassword = await hashPassword(adminPassword);
+      await storage.createUser({
+        username: adminUsername,
+        password: hashedPassword,
+      });
+      console.log("Admin user created successfully");
+    }
+  } catch (error) {
+    console.error("Error ensuring admin user:", error);
+  }
+}
+
+export async function setupAuth(app: Express) {
+  await ensureAdminUser();
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
   const pgStore = connectPg(session);
   const sessionStore = new pgStore({
@@ -21,6 +60,7 @@ export function setupAuth(app: Express) {
     cookie: {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
       maxAge: sessionTtl,
     },
   };
@@ -32,35 +72,38 @@ export function setupAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin@lest.hr";
-  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "fIqM&3G)]LRojQ4v";
-  
-  const ADMIN_USER = {
-    id: "admin",
-    username: ADMIN_USERNAME,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
-
   passport.serializeUser((user: any, done) => done(null, user.id));
-  passport.deserializeUser((id: string, done) => {
-    if (id === "admin") {
-      done(null, ADMIN_USER);
-    } else {
-      done(null, null);
+  passport.deserializeUser(async (id: string, done) => {
+    try {
+      const user = await storage.getUser(id);
+      if (user) {
+        const { password, ...sanitized } = user;
+        done(null, sanitized);
+      } else {
+        done(null, null);
+      }
+    } catch (error) {
+      done(error);
     }
   });
 
-  app.post("/api/login", (req, res, next) => {
-    const { username, password } = req.body;
-    
-    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-      req.login(ADMIN_USER, (err) => {
+  app.post("/api/login", async (req, res, next) => {
+    try {
+      const { username, password } = req.body;
+      
+      const user = await storage.getUserByUsername(username);
+      if (!user || !(await comparePasswords(password, user.password))) {
+        return res.status(401).json({ message: "Invalid username or password" });
+      }
+
+      const { password: _, ...sanitized } = user;
+      req.login(sanitized, (err) => {
         if (err) return next(err);
-        res.status(200).json(ADMIN_USER);
+        res.status(200).json(sanitized);
       });
-    } else {
-      res.status(401).json({ message: "Invalid username or password" });
+    } catch (error) {
+      console.error("Login error:", error);
+      res.status(500).json({ message: "Login failed" });
     }
   });
 

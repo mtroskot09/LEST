@@ -20,11 +20,13 @@ Employee scheduling application for "Frizerski studio LEST", a hair salon in Zag
 ## Core Features
 
 ### 1. User Authentication
-- **Login Only:** Single admin user authentication (no registration)
-- **Default Credentials:** Username: `admin@lest.hr` / Password: `fIqM&3G)]LRojQ4v`
-- **Configurable:** Set `ADMIN_USERNAME` and `ADMIN_PASSWORD` environment variables to change credentials
-- **Session Management:** Secure cookie-based sessions with PostgreSQL storage
+- **Single-User System:** Fixed admin user for salon owner (no multi-user support)
+- **Admin Credentials:** Username: `admin@lest.hr` / Password: `fIqM&3G)]LRojQ4v`
+- **Database-backed:** Credentials verified against database with secure password hashing
+- **Auto-seeding:** Admin user automatically created on first startup
+- **Session Management:** Secure cookie-based sessions with PostgreSQL storage (SameSite=lax)
 - **Protected Routes:** All scheduling features require authentication
+- **Security:** Passwords hashed with scrypt, user data sanitized, no password exposure
 - **Multi-language Support:** Croatian (default) and English
 
 ### 2. Language Support
@@ -194,13 +196,12 @@ shared/
 - ✅ Fixed session cookie settings for development (secure only in production)
 - ✅ Implemented user sanitization to prevent password hash exposure
 - ✅ Simplified to single admin user (removed registration system)
+- ✅ Configured database-backed authentication for admin user
 
 ## Environment Variables
 - `DATABASE_URL` - PostgreSQL connection string
 - `SESSION_SECRET` - Session encryption key
 - `NODE_ENV` - Environment (development/production)
-- `ADMIN_USERNAME` - Admin username (default: admin@lest.hr)
-- `ADMIN_PASSWORD` - Admin password (default: fIqM&3G)]LRojQ4v)
 
 ## Running the Application
 ```bash
@@ -210,15 +211,16 @@ npm run db:push  # Sync database schema
 
 ## Key Design Decisions
 
-1. **Authentication:** Username/password (not OAuth) per user request
+1. **Authentication:** Single admin user with database-backed authentication
 2. **Language:** Croatian as default, English as secondary
-3. **User Isolation:** Each user has their own employees and schedules
-4. **Date-Based Queries:** Time blocks fetched by date for performance
-5. **Color Assignment:** Automatic color rotation for new employees
-6. **Drag Transfer:** Moving blocks between columns = shift transfer
-7. **Real-time Sync:** Optimistic updates with React Query
-8. **Protected Routes:** Landing page (/) is login/auth, schedule at /schedule route
-9. **Security:** All user data sanitized before sending to client, passwords hashed with scrypt
+3. **Single-User App:** One salon owner manages all employees and schedules
+4. **Auto-seeding:** Admin user created automatically on startup if missing
+5. **Date-Based Queries:** Time blocks fetched by date for performance
+6. **Color Assignment:** Automatic color rotation for new employees
+7. **Drag Transfer:** Moving blocks between columns = shift transfer
+8. **Real-time Sync:** Optimistic updates with React Query
+9. **Protected Routes:** Landing page (/) is login/auth, schedule at /schedule route
+10. **Security:** Passwords hashed with scrypt, SameSite cookies, user data sanitized
 
 ## Translation Keys
 All UI text is translated. Key translation categories:
