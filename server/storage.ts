@@ -1,38 +1,121 @@
-import { type User, type InsertUser } from "@shared/schema";
-import { randomUUID } from "crypto";
-
-// modify the interface with any CRUD methods
-// you might need
+import {
+  users,
+  employees,
+  timeBlocks,
+  type User,
+  type UpsertUser,
+  type Employee,
+  type InsertEmployee,
+  type TimeBlock,
+  type InsertTimeBlock,
+} from "@shared/schema";
+import { db } from "./db";
+import { eq, and } from "drizzle-orm";
 
 export interface IStorage {
+  // User operations (mandatory for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  upsertUser(user: UpsertUser): Promise<User>;
+  
+  // Employee operations
+  getEmployeesByUser(userId: string): Promise<Employee[]>;
+  getEmployee(id: string): Promise<Employee | undefined>;
+  createEmployee(employee: InsertEmployee): Promise<Employee>;
+  updateEmployee(id: string, employee: Partial<InsertEmployee>): Promise<Employee | undefined>;
+  deleteEmployee(id: string): Promise<void>;
+  
+  // Time block operations
+  getTimeBlocksByUserAndDate(userId: string, date: string): Promise<TimeBlock[]>;
+  getTimeBlock(id: string): Promise<TimeBlock | undefined>;
+  createTimeBlock(block: InsertTimeBlock): Promise<TimeBlock>;
+  updateTimeBlock(id: string, block: Partial<InsertTimeBlock>): Promise<TimeBlock | undefined>;
+  deleteTimeBlock(id: string): Promise<void>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User>;
-
-  constructor() {
-    this.users = new Map();
-  }
-
+export class DatabaseStorage implements IStorage {
+  // User operations (mandatory for Replit Auth)
   async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;
   }
+
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return user;
+  }
+
+  // Employee operations
+  async getEmployeesByUser(userId: string): Promise<Employee[]> {
+    return await db
+      .select()
+      .from(employees)
+      .where(eq(employees.userId, userId))
+      .orderBy(employees.displayOrder);
+  }
+
+  async getEmployee(id: string): Promise<Employee | undefined> {
+    const [employee] = await db.select().from(employees).where(eq(employees.id, id));
+    return employee;
+  }
+
+  async createEmployee(employee: InsertEmployee): Promise<Employee> {
+    const [newEmployee] = await db.insert(employees).values(employee).returning();
+    return newEmployee;
+  }
+
+  async updateEmployee(id: string, employee: Partial<InsertEmployee>): Promise<Employee | undefined> {
+    const [updated] = await db
+      .update(employees)
+      .set(employee)
+      .where(eq(employees.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteEmployee(id: string): Promise<void> {
+    await db.delete(employees).where(eq(employees.id, id));
+  }
+
+  // Time block operations
+  async getTimeBlocksByUserAndDate(userId: string, date: string): Promise<TimeBlock[]> {
+    return await db
+      .select()
+      .from(timeBlocks)
+      .where(and(eq(timeBlocks.userId, userId), eq(timeBlocks.date, date)));
+  }
+
+  async getTimeBlock(id: string): Promise<TimeBlock | undefined> {
+    const [block] = await db.select().from(timeBlocks).where(eq(timeBlocks.id, id));
+    return block;
+  }
+
+  async createTimeBlock(block: InsertTimeBlock): Promise<TimeBlock> {
+    const [newBlock] = await db.insert(timeBlocks).values(block).returning();
+    return newBlock;
+  }
+
+  async updateTimeBlock(id: string, block: Partial<InsertTimeBlock>): Promise<TimeBlock | undefined> {
+    const [updated] = await db
+      .update(timeBlocks)
+      .set({ ...block, updatedAt: new Date() })
+      .where(eq(timeBlocks.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteTimeBlock(id: string): Promise<void> {
+    await db.delete(timeBlocks).where(eq(timeBlocks.id, id));
+  }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
