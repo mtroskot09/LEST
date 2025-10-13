@@ -24,12 +24,33 @@ export async function apiRequest(
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";
+/**
+ * Default query function for React Query
+ * 
+ * QueryKey structure:
+ * - ["/api/path"] → GET /api/path
+ * - ["/api/path", "value"] → GET /api/path?date=value
+ * - ["/api/path", "seg1", "seg2"] → GET /api/path/seg1/seg2
+ */
 export const getQueryFn: <T>(options: {
   on401: UnauthorizedBehavior;
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const res = await fetch(queryKey.join("/") as string, {
+    // Handle query parameters properly
+    let url: string;
+    if (queryKey.length === 1) {
+      url = queryKey[0] as string;
+    } else if (queryKey.length === 2) {
+      const [path, param] = queryKey;
+      // Check if the path already has query params
+      const separator = (path as string).includes('?') ? '&' : '?';
+      url = `${path}${separator}date=${param}`;
+    } else {
+      url = queryKey.join("/") as string;
+    }
+
+    const res = await fetch(url, {
       credentials: "include",
     });
 

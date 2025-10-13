@@ -197,6 +197,7 @@ shared/
 - ✅ Implemented user sanitization to prevent password hash exposure
 - ✅ Simplified to single admin user (removed registration system)
 - ✅ Configured database-backed authentication for admin user
+- ✅ Fixed time block saving issue (query parameter handling in queryClient)
 
 ## Environment Variables
 - `DATABASE_URL` - PostgreSQL connection string
