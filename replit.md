@@ -21,10 +21,10 @@ Employee scheduling application for "Frizerski studio LEST", a hair salon in Zag
 
 ### 1. User Authentication
 - **Login Only:** Single admin user authentication (no registration)
-- **Credentials:** Username: `admin@lest.hr` / Password: `fIqM&3G)]LRojQ4v`
+- **Default Credentials:** Username: `admin@lest.hr` / Password: `fIqM&3G)]LRojQ4v`
+- **Configurable:** Set `ADMIN_USERNAME` and `ADMIN_PASSWORD` environment variables to change credentials
 - **Session Management:** Secure cookie-based sessions with PostgreSQL storage
 - **Protected Routes:** All scheduling features require authentication
-- **Security:** Password hashing with scrypt, sanitized user data (no password exposure)
 - **Multi-language Support:** Croatian (default) and English
 
 ### 2. Language Support
@@ -199,6 +199,8 @@ shared/
 - `DATABASE_URL` - PostgreSQL connection string
 - `SESSION_SECRET` - Session encryption key
 - `NODE_ENV` - Environment (development/production)
+- `ADMIN_USERNAME` - Admin username (default: admin@lest.hr)
+- `ADMIN_PASSWORD` - Admin password (default: fIqM&3G)]LRojQ4v)
 
 ## Running the Application
 ```bash
