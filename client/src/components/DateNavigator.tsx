@@ -28,35 +28,45 @@ export default function DateNavigator({ date, onDateChange }: DateNavigatorProps
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1 sm:gap-2">
+      {/* Today button - hide text on mobile */}
       <Button
         variant="outline"
         size="sm"
         onClick={handleToday}
         data-testid="button-today"
+        className="flex-shrink-0"
       >
-        <Calendar className="h-4 w-4 mr-1" />
-        {t.date.today}
+        <Calendar className="h-4 w-4 sm:mr-1" />
+        <span className="hidden sm:inline">{t.date.today}</span>
       </Button>
+      
+      {/* Date navigation */}
       <div className="flex items-center gap-1">
         <Button
           variant="ghost"
           size="icon"
           onClick={handlePrevDay}
           data-testid="button-prev-day"
+          className="flex-shrink-0"
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <div className="min-w-[160px] text-center">
-          <span className="text-sm font-medium" data-testid="text-current-date">
-            {format(date, 'EEEE, MMM d, yyyy')}
+        
+        {/* Date display - shorter format on mobile */}
+        <div className="min-w-[120px] sm:min-w-[160px] text-center">
+          <span className="text-xs sm:text-sm font-medium" data-testid="text-current-date">
+            <span className="sm:hidden">{format(date, 'MMM d')}</span>
+            <span className="hidden sm:inline">{format(date, 'EEEE, MMM d, yyyy')}</span>
           </span>
         </div>
+        
         <Button
           variant="ghost"
           size="icon"
           onClick={handleNextDay}
           data-testid="button-next-day"
+          className="flex-shrink-0"
         >
           <ChevronRight className="h-4 w-4" />
         </Button>

@@ -12,6 +12,7 @@ import { Card } from "@/components/ui/card";
 interface EmployeeManagerProps {
   employees: Employee[];
   onEmployeesChange: (employees: Employee[]) => void;
+  showTitle?: boolean;
 }
 
 const EMPLOYEE_COLORS = [
@@ -22,7 +23,7 @@ const EMPLOYEE_COLORS = [
   'hsl(340 82% 52%)',
 ];
 
-export default function EmployeeManager({ employees, onEmployeesChange }: EmployeeManagerProps) {
+export default function EmployeeManager({ employees, onEmployeesChange, showTitle = true }: EmployeeManagerProps) {
   const { t } = useLanguage();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newEmployeeName, setNewEmployeeName] = useState("");
@@ -49,13 +50,23 @@ export default function EmployeeManager({ employees, onEmployeesChange }: Employ
   return (
     <>
       <div className="space-y-2">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">{t.employees.title}</h2>
-          <Button size="sm" onClick={() => setIsDialogOpen(true)} data-testid="button-add-employee">
-            <Plus className="h-4 w-4 mr-1" />
-            {t.employees.add}
-          </Button>
-        </div>
+        {showTitle && (
+          <div className="space-y-4 mb-4">
+            <h2 className="text-lg font-semibold">{t.employees.title}</h2>
+            <Button size="sm" onClick={() => setIsDialogOpen(true)} data-testid="button-add-employee" className="w-full">
+              <Plus className="h-4 w-4 mr-1" />
+              {t.employees.add}
+            </Button>
+          </div>
+        )}
+        {!showTitle && (
+          <div className="mb-4">
+            <Button size="sm" onClick={() => setIsDialogOpen(true)} data-testid="button-add-employee" className="w-full">
+              <Plus className="h-4 w-4 mr-1" />
+              {t.employees.add}
+            </Button>
+          </div>
+        )}
 
         <div className="space-y-2">
           {employees.map(employee => (

@@ -73,6 +73,8 @@ export const translations = {
       add: "Dodaj termin",
       startTime: "Početno vrijeme",
       endTime: "Završno vrijeme",
+      clientName: "Ime i prezime klijenta",
+      clientNamePlaceholder: "npr. Ana Marić",
       task: "Usluga (neobavezno)",
       taskPlaceholder: "npr. Šišanje i feniranje",
       create: "Kreiraj termin",
@@ -92,10 +94,18 @@ export const translations = {
       failedToCreateBlock: "Nije moguće kreirati termin",
       failedToUpdateBlock: "Nije moguće ažurirati termin",
       failedToDeleteBlock: "Nije moguće obrisati termin",
+      invalidStartTime: "Početno vrijeme mora biti na :00, :15, :30 ili :45",
+      invalidEndTime: "Završno vrijeme mora biti na :00, :15, :30 ili :45",
+      minimumDuration: "Minimalno trajanje je 15 minuta",
+      invalidDuration: "Završno vrijeme mora biti nakon početnog vremena",
+      timeConflict: "Ovaj termin se preklapa s postojećim terminom",
+      outsideHours: "Termini moraju biti unutar radnog vremena (9:00-19:00)",
     },
     
     // Time labels
     time: "Vrijeme",
+    name: "Ime",
+    service: "Usluga",
   },
   
   en: {
@@ -172,6 +182,8 @@ export const translations = {
       add: "Add Appointment",
       startTime: "Start Time",
       endTime: "End Time",
+      clientName: "Client Name",
+      clientNamePlaceholder: "e.g. John Smith",
       task: "Service (Optional)",
       taskPlaceholder: "e.g. Haircut and styling",
       create: "Create Appointment",
@@ -191,10 +203,18 @@ export const translations = {
       failedToCreateBlock: "Failed to create appointment",
       failedToUpdateBlock: "Failed to update appointment",
       failedToDeleteBlock: "Failed to delete appointment",
+      invalidStartTime: "Start time must be at :00, :15, :30, or :45",
+      invalidEndTime: "End time must be at :00, :15, :30, or :45",
+      minimumDuration: "Minimum duration is 15 minutes",
+      invalidDuration: "End time must be after start time",
+      timeConflict: "This time slot conflicts with an existing appointment",
+      outsideHours: "Appointments must be within business hours (9:00-19:00)",
     },
     
     // Time labels
     time: "Time",
+    name: "Name",
+    service: "Service",
   },
 };
 

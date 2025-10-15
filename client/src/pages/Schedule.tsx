@@ -45,6 +45,7 @@ function transformTimeBlock(dbBlock: DBTimeBlock) {
     startTime: dbBlock.startTime,
     endTime: dbBlock.endTime,
     task: dbBlock.task || undefined,
+    clientName: dbBlock.clientName || undefined,
   };
 }
 
@@ -109,6 +110,7 @@ export default function Schedule() {
       startTime: string;
       endTime: string;
       task?: string;
+      clientName?: string;
     }) => {
       const res = await apiRequest("POST", "/api/timeblocks", data);
       return await res.json();
@@ -189,6 +191,7 @@ export default function Schedule() {
     startTime: string;
     endTime: string;
     task?: string;
+    clientName?: string;
   }>) => {
     const currentIds = new Set(blocks.map(b => b.id));
     const newIds = new Set(newBlocks.map(b => b.id));
@@ -202,6 +205,7 @@ export default function Schedule() {
         startTime: block.startTime,
         endTime: block.endTime,
         task: block.task,
+        clientName: block.clientName,
       });
     });
 
@@ -218,7 +222,8 @@ export default function Schedule() {
         oldBlock.employeeId !== newBlock.employeeId ||
         oldBlock.startTime !== newBlock.startTime ||
         oldBlock.endTime !== newBlock.endTime ||
-        oldBlock.task !== newBlock.task
+        oldBlock.task !== newBlock.task ||
+        oldBlock.clientName !== newBlock.clientName
       );
     });
     updated.forEach(block => {
@@ -229,6 +234,7 @@ export default function Schedule() {
           startTime: block.startTime,
           endTime: block.endTime,
           task: block.task || null,
+          clientName: block.clientName || null,
         },
       });
     });
@@ -240,22 +246,29 @@ export default function Schedule() {
     <div className="h-screen flex flex-col">
       <header className="border-b bg-card px-4 py-3">
         <div className="flex items-center justify-between">
+          {/* Logo and App Name - Hidden on mobile */}
           <div className="flex items-center gap-3">
-            <Scissors className="h-6 w-6 text-primary" />
-            <div>
+            <Scissors className="h-6 w-6 text-primary hidden sm:block" />
+            <div className="hidden sm:block">
               <h1 className="text-lg font-semibold">{t.appName}</h1>
               <p className="text-xs text-muted-foreground">{t.salon}</p>
             </div>
+            {/* Mobile: Show nothing - completely hidden */}
           </div>
 
-          <div className="flex items-center gap-2">
-            <DateNavigator date={currentDate} onDateChange={setCurrentDate} />
+          {/* Right side controls */}
+          <div className="flex items-center gap-1 sm:gap-2">
+            {/* Date Navigator - Full on mobile, compact on desktop */}
+            <div className="flex-shrink-0">
+              <DateNavigator date={currentDate} onDateChange={setCurrentDate} />
+            </div>
 
+            {/* Employee Management - Icon only on mobile */}
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="outline" size="sm" data-testid="button-manage-employees">
-                  <Users className="h-4 w-4 mr-1" />
-                  {t.nav.employees}
+                <Button variant="outline" size="sm" data-testid="button-manage-employees" className="flex-shrink-0">
+                  <Users className="h-4 w-4 sm:mr-1" />
+                  <span className="hidden sm:inline">{t.nav.employees}</span>
                 </Button>
               </SheetTrigger>
               <SheetContent>
@@ -263,17 +276,21 @@ export default function Schedule() {
                   <SheetTitle>{t.employees.title}</SheetTitle>
                 </SheetHeader>
                 <div className="mt-6">
-                  <EmployeeManager employees={employees} onEmployeesChange={handleEmployeesChange} />
+                  <EmployeeManager employees={employees} onEmployeesChange={handleEmployeesChange} showTitle={false} />
                 </div>
               </SheetContent>
             </Sheet>
 
-            <LanguageSwitch />
-            <ThemeToggle />
+            {/* Language and Theme - Icons only on mobile */}
+            <div className="flex items-center gap-1">
+              <LanguageSwitch />
+              <ThemeToggle />
+            </div>
 
+            {/* User Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" data-testid="button-user-menu">
+                <Button variant="ghost" size="icon" data-testid="button-user-menu" className="flex-shrink-0">
                   <Avatar className="h-8 w-8">
                     <AvatarFallback>{userInitials}</AvatarFallback>
                   </Avatar>
@@ -290,7 +307,7 @@ export default function Schedule() {
         </div>
       </header>
 
-      <main className="flex-1 overflow-hidden">
+      <main className="flex-1">
         <ScheduleGrid employees={employees} blocks={blocks} onBlocksChange={handleBlocksChange} date={currentDate} />
       </main>
     </div>

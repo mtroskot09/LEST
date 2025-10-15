@@ -73,6 +73,7 @@ export const timeBlocks = pgTable("time_blocks", {
   date: varchar("date").notNull(),
   startTime: varchar("start_time").notNull(),
   endTime: varchar("end_time").notNull(),
+  clientName: varchar("client_name"),
   task: text("task"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
