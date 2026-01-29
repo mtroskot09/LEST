@@ -3,26 +3,8 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 import { fileURLToPath } from "url";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
-import { readFileSync, writeFileSync } from "fs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-// Plugin to remove crossorigin attribute from built HTML
-const removeCrossoriginPlugin = () => {
-  return {
-    name: 'remove-crossorigin',
-    closeBundle() {
-      const htmlPath = path.resolve(__dirname, 'public/index.html');
-      try {
-        let html = readFileSync(htmlPath, 'utf-8');
-        html = html.replace(/\s+crossorigin(?=["\s>])/g, '');
-        writeFileSync(htmlPath, html);
-      } catch (e) {
-        // Ignore if file doesn't exist
-      }
-    },
-  };
-};
 
 export default defineConfig(async ({ mode }) => {
   const isProduction = mode === 'production';
@@ -31,7 +13,6 @@ export default defineConfig(async ({ mode }) => {
     plugins: [
       react(),
       runtimeErrorOverlay(),
-      removeCrossoriginPlugin(),
       ...(process.env.NODE_ENV !== "production" &&
       process.env.REPL_ID !== undefined
         ? [
@@ -47,10 +28,11 @@ export default defineConfig(async ({ mode }) => {
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "resources/js/src"),
+        "@assets": path.resolve(__dirname, "../attached_assets"),
       },
     },
     root: path.resolve(__dirname, "resources/js"),
-    base: '/',
+    base: isProduction ? '/' : '/',
     build: {
       outDir: path.resolve(__dirname, "public"),
       emptyOutDir: false, // Don't empty Laravel's public directory
@@ -59,12 +41,6 @@ export default defineConfig(async ({ mode }) => {
       },
       // Ensure assets are in assets folder
       assetsDir: 'assets',
-      // Ensure absolute paths for assets
-      assetsInlineLimit: 0,
-      // Don't add crossorigin attribute for same-origin assets
-      manifest: false,
-      // Ensure paths are resolved correctly
-      copyPublicDir: false,
     },
     server: {
       port: 5173,
